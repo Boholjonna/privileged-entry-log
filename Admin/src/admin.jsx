@@ -94,7 +94,7 @@ function Admin() {
         return (
           <div className="section-content">
             <div className="welcome-header">
-              <h2>Welcome back, Admin! 👋</h2>
+              {/* <h2>Welcome back, Admin! 👋</h2> */}
               <p>Here's what's happening with your portfolio today</p>
             </div>
             
@@ -552,8 +552,8 @@ function Admin() {
       <div className="admin-header">
         <div className="header-content">
           <div className="welcome-message">
-            <h1 className="admin-title">🎯 Admin Dashboard</h1>
-            <p className="admin-subtitle">Welcome back! Ready to make your portfolio amazing?</p>
+            <h1 className="admin-title">🎯 Welcome back, Admin!</h1>
+            <p className="admin-subtitle">Ready to make your portfolio amazing?</p>
           </div>
           <div className="header-actions">
             <button className="mobile-menu-btn" onClick={toggleMobileMenu}>
