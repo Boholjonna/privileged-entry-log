@@ -1,4 +1,5 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
+import { supabase } from './supabaseClient';
 import './styles/Admin.css';
 
 function Admin() {
@@ -8,6 +9,51 @@ function Admin() {
   const [skillsImage, setSkillsImage] = useState(null);
   const [projectImage, setProjectImage] = useState(null);
   const [contactImage, setContactImage] = useState(null);
+  const [userId, setUserId] = useState(null);
+
+  // Get the user ID when component mounts
+  useEffect(() => {
+    const getUserId = async () => {
+      try {
+        const { data: { user }, error } = await supabase.auth.getUser();
+        if (error) throw error;
+        if (user) {
+          console.log('Current user ID:', user.id);
+          setUserId(user.id);
+        }
+      } catch (error) {
+        console.error('Error getting user:', error);
+        showMessage('Error getting user authentication. Please log in again.', 'error');
+      }
+    };
+    getUserId();
+  }, []);
+  
+  // Form states for each section
+  const [skillsData, setSkillsData] = useState({ title: '' });
+  const [projectData, setProjectData] = useState({
+    type: '',
+    title: '',
+    description: '',
+    videoUrl: '',
+    techStack: '',
+    responsibilities: ''
+  });
+  const [experienceData, setExperienceData] = useState({
+    role: '',
+    companyDuration: '',
+    skills: '',
+    about: '',
+    responsibilities: ''
+  });
+  const [credentialsData, setCredentialsData] = useState({
+    type: '',
+    description: ''
+  });
+  const [contactData, setContactData] = useState({ title: '' });
+  
+  // Success/Error messages
+  const [message, setMessage] = useState({ text: '', type: '' });
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleImageUpload = () => {
@@ -17,7 +63,11 @@ function Admin() {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setSelectedImage(URL.createObjectURL(file));
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setSelectedImage(reader.result);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -27,6 +77,239 @@ function Admin() {
 
   const closeMobileMenu = () => {
     setIsMobileMenuOpen(false);
+  };
+
+  // Function to convert data URL to File object
+  const dataURLtoFile = async (dataUrl, fileName = 'image.jpg') => {
+    const res = await fetch(dataUrl);
+    const blob = await res.blob();
+    return new File([blob], fileName, { type: blob.type });
+  };
+
+  // Function to upload image to Supabase storage
+  const uploadImage = async (dataUrl, path) => {
+    try {
+      const file = await dataURLtoFile(dataUrl);
+      const fileExt = file.type.split('/')[1];
+      const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`;
+      const filePath = `${path}/${fileName}`;
+      
+      const { data, error } = await supabase.storage
+        .from('images')
+        .upload(filePath, file);
+      
+      if (error) throw error;
+      
+      const { data: { publicUrl } } = supabase.storage
+        .from('images')
+        .getPublicUrl(filePath);
+      
+      return publicUrl;
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      throw error;
+    }
+  };
+
+  // Function to show success/error message
+  const showMessage = (text, type = 'success') => {
+    setMessage({ text, type });
+    setTimeout(() => setMessage({ text: '', type: '' }), 5000);
+  };
+
+  // Skills section save handler
+  const handleSkillsSave = async () => {
+    try {
+      if (!userId) {
+        throw new Error('You must be authenticated to perform this action');
+      }
+
+      if (!skillsImage || !skillsData.title) {
+        throw new Error('Please fill in all required fields');
+      }
+
+      const imageUrl = await uploadImage(skillsImage, 'images');
+
+      const { error } = await supabase
+        .from('Skills')
+        .insert([{
+          skill: skillsData.title,
+          'image-url': imageUrl,
+          user_id: userId
+        }]);
+
+      if (error) {
+        console.error('Insert error:', error);
+        throw error;
+      }
+      
+      showMessage('Skills section saved successfully!');
+      
+      // Clear form after successful save
+      setSkillsImage(null);
+      setSkillsData({ title: '' });
+    } catch (error) {
+      console.error('Save error:', error);
+      showMessage(error.message, 'error');
+    }
+  };
+
+  // Projects section save handler
+  const handleProjectsSave = async () => {
+    try {
+      if (!projectImage || !projectData.type || !projectData.title || 
+          !projectData.description || !projectData.techStack || !projectData.responsibilities) {
+        throw new Error('Please fill in all required fields');
+      }
+
+      const imageUrl = await uploadImage(projectImage, 'images');
+
+      const { error } = await supabase
+        .from('Projects')
+        .insert([{
+          type: projectData.type,
+          'image-url': imageUrl,
+          'video-url': projectData.videoUrl,
+          description: projectData.description,
+          stack: projectData.techStack,
+          responsibilities: projectData.responsibilities
+        }]);
+
+      if (error) throw error;
+      showMessage('Project saved successfully!');
+      
+      // Clear form after successful save
+      setProjectImage(null);
+      setProjectData({
+        type: '',
+        title: '',
+        description: '',
+        videoUrl: '',
+        techStack: '',
+        responsibilities: ''
+      });
+    } catch (error) {
+      console.error('Save error:', error);
+      showMessage(error.message, 'error');
+    }
+  };
+
+  // Experience section save handler
+  const handleExperienceSave = async () => {
+    try {
+      if (!userId) {
+        throw new Error('You must be authenticated to perform this action');
+      }
+
+      if (!experienceData.role || !experienceData.companyDuration || 
+          !experienceData.skills || !experienceData.about || !experienceData.responsibilities) {
+        throw new Error('Please fill in all required fields');
+      }
+
+      const { error } = await supabase
+        .from('Experience')
+        .insert([{
+          role: experienceData.role,
+          companyduration: experienceData.companyDuration,
+          skills: experienceData.skills,
+          about: experienceData.about,
+          responsibilities: experienceData.responsibilities,
+          user_id: userId
+        }]);
+
+      if (error) {
+        console.error('Insert error:', error);
+        throw error;
+      }
+
+      showMessage('Experience saved successfully!');
+      
+      // Clear form after successful save
+      setExperienceData({
+        role: '',
+        companyDuration: '',
+        skills: '',
+        about: '',
+        responsibilities: ''
+      });
+    } catch (error) {
+      console.error('Save error:', error);
+      showMessage(error.message, 'error');
+    }
+  };
+
+  // Credentials section save handler
+  const handleCredentialsSave = async () => {
+    try {
+      if (!userId) {
+        throw new Error('You must be authenticated to perform this action');
+      }
+
+      if (!credentialsData.type || !credentialsData.description) {
+        throw new Error('Please fill in all required fields');
+      }
+
+      const { error } = await supabase
+        .from('Credentials')
+        .insert([{
+          type: credentialsData.type,
+          description: credentialsData.description,
+          user_id: userId
+        }]);
+
+      if (error) {
+        console.error('Insert error:', error);
+        throw error;
+      }
+
+      showMessage('Credentials saved successfully!');
+      
+      // Clear form after successful save
+      setCredentialsData({
+        type: '',
+        description: ''
+      });
+    } catch (error) {
+      console.error('Save error:', error);
+      showMessage(error.message, 'error');
+    }
+  };
+
+  // Contact section save handler
+  const handleContactSave = async () => {
+    try {
+      if (!userId) {
+        throw new Error('You must be authenticated to perform this action');
+      }
+
+      if (!contactImage || !contactData.title) {
+        throw new Error('Please fill in all required fields');
+      }
+
+      const imageUrl = await uploadImage(contactImage, 'images');
+
+      const { error } = await supabase
+        .from('ContactMedia')
+        .insert([{
+          'image-url': imageUrl,
+          title: contactData.title,
+          user_id: userId
+        }]);
+
+      if (error) {
+        console.error('Insert error:', error);
+        throw error;
+      }
+
+      showMessage('Contact section saved successfully!');
+      
+      // Clear form after successful save
+      setContactImage(null);
+      setContactData({ title: '' });
+    } catch (error) {
+      console.error('Save error:', error);
+      showMessage(error.message, 'error');
+    }
   };
 
   const adminSections = [
@@ -224,17 +507,24 @@ function Admin() {
             
             <div className="form-grid">
               <div className="form-group">
-                <label>Skills Image</label>
+                <label>Skills Image<span className="required">*</span></label>
                 <div className="image-upload-area">
                   <input
                     type="file"
                     accept="image/*"
                     onChange={(e) => {
                       const file = e.target.files?.[0]
-                      if (file) setSkillsImage(URL.createObjectURL(file))
+                      if (file) {
+                        const reader = new FileReader();
+                        reader.onloadend = () => {
+                          setSkillsImage(reader.result);
+                        };
+                        reader.readAsDataURL(file);
+                      }
                     }}
                     style={{ display: 'none' }}
                     id="skills-image-input"
+                    required
                   />
                   <button type="button" className="upload-btn" onClick={() => document.getElementById('skills-image-input').click()}>
                     {skillsImage ? 'Change Image' : 'Upload Image'}
@@ -246,13 +536,29 @@ function Admin() {
               </div>
 
               <div className="form-group">
-                <label>Section Title</label>
-                <input type="text" placeholder="e.g., Skills & Tools" className="admin-input" />
+                <label>Section Title<span className="required">*</span></label>
+                <input 
+                  type="text" 
+                  placeholder="e.g., Skills & Tools" 
+                  className="admin-input"
+                  value={skillsData.title}
+                  onChange={(e) => setSkillsData({ ...skillsData, title: e.target.value })}
+                  required 
+                />
               </div>
 
+              {message.text && (
+                <div className={`message ${message.type}`}>
+                  {message.text}
+                </div>
+              )}
+
               <div className="form-actions">
-                <button className="save-btn">💾 Save Skills</button>
-                <button className="cancel-btn">❌ Cancel</button>
+                <button className="save-btn" onClick={handleSkillsSave}>💾 Save Skills</button>
+                <button className="cancel-btn" onClick={() => {
+                  setSkillsImage(null);
+                  setSkillsData({ title: '' });
+                }}>❌ Cancel</button>
               </div>
             </div>
           </div>
@@ -269,31 +575,52 @@ function Admin() {
             <div className="project-form">
               <div className="form-grid">
                 <div className="form-group">
-                  <label>Project Type</label>
+                  <label>Project Type<span className="required">*</span></label>
                   <div className="radio-group">
                     <label className="radio-option">
-                      <input type="radio" name="project-type" />
+                      <input 
+                        type="radio" 
+                        name="project-type" 
+                        value="Solo"
+                        checked={projectData.type === 'Solo'}
+                        onChange={(e) => setProjectData({ ...projectData, type: e.target.value })}
+                        required
+                      />
                       <span>Solo</span>
                     </label>
                     <label className="radio-option">
-                      <input type="radio" name="project-type" />
+                      <input 
+                        type="radio" 
+                        name="project-type" 
+                        value="Team"
+                        checked={projectData.type === 'Team'}
+                        onChange={(e) => setProjectData({ ...projectData, type: e.target.value })}
+                        required
+                      />
                       <span>Team</span>
                     </label>
                   </div>
                 </div>
 
                 <div className="form-group">
-                  <label>Project Image</label>
+                  <label>Project Image<span className="required">*</span></label>
                   <div className="image-upload-area">
                     <input
                       type="file"
                       accept="image/*"
                       onChange={(e) => {
                         const file = e.target.files?.[0]
-                        if (file) setProjectImage(URL.createObjectURL(file))
+                        if (file) {
+                          const reader = new FileReader();
+                          reader.onloadend = () => {
+                            setProjectImage(reader.result);
+                          };
+                          reader.readAsDataURL(file);
+                        }
                       }}
                       style={{ display: 'none' }}
                       id="project-image-input"
+                      required
                     />
                     <button type="button" className="upload-btn" onClick={() => document.getElementById('project-image-input').click()}>
                       {projectImage ? 'Change Image' : 'Upload Image'}
@@ -306,33 +633,83 @@ function Admin() {
 
                 <div className="form-group">
                   <label>Video URL</label>
-                  <input type="url" placeholder="https://... (optional)" className="admin-input" />
+                  <input 
+                    type="url" 
+                    placeholder="https://... (optional)" 
+                    className="admin-input" 
+                    value={projectData.videoUrl}
+                    onChange={(e) => setProjectData({ ...projectData, videoUrl: e.target.value })}
+                  />
                 </div>
 
                 <div className="form-group">
-                  <label>Project Title</label>
-                  <input type="text" placeholder="e.g., E-commerce Platform" className="admin-input" />
+                  <label>Project Title<span className="required">*</span></label>
+                  <input 
+                    type="text" 
+                    placeholder="e.g., E-commerce Platform" 
+                    className="admin-input"
+                    value={projectData.title}
+                    onChange={(e) => setProjectData({ ...projectData, title: e.target.value })}
+                    required
+                  />
                 </div>
 
                 <div className="form-group full-width">
-                  <label>Project Description</label>
-                  <textarea placeholder="Describe your project, its features, and your role..." className="admin-textarea" rows="3"></textarea>
+                  <label>Project Description<span className="required">*</span></label>
+                  <textarea 
+                    placeholder="Describe your project, its features, and your role..." 
+                    className="admin-textarea" 
+                    rows="3"
+                    value={projectData.description}
+                    onChange={(e) => setProjectData({ ...projectData, description: e.target.value })}
+                    required
+                  ></textarea>
                 </div>
 
                 <div className="form-group full-width">
-                  <label>Tech Stack</label>
-                  <input type="text" placeholder="e.g., React, Vite, Supabase" className="admin-input" />
+                  <label>Tech Stack<span className="required">*</span></label>
+                  <input 
+                    type="text" 
+                    placeholder="e.g., React, Vite, Supabase" 
+                    className="admin-input"
+                    value={projectData.techStack}
+                    onChange={(e) => setProjectData({ ...projectData, techStack: e.target.value })}
+                    required
+                  />
                 </div>
 
                 <div className="form-group full-width">
-                  <label>Responsibilities</label>
-                  <textarea placeholder="Bullet your responsibilities and contributions" className="admin-textarea" rows="3"></textarea>
+                  <label>Responsibilities<span className="required">*</span></label>
+                  <textarea 
+                    placeholder="Bullet your responsibilities and contributions" 
+                    className="admin-textarea" 
+                    rows="3"
+                    value={projectData.responsibilities}
+                    onChange={(e) => setProjectData({ ...projectData, responsibilities: e.target.value })}
+                    required
+                  ></textarea>
                 </div>
               </div>
 
+              {message.text && (
+                <div className={`message ${message.type}`}>
+                  {message.text}
+                </div>
+              )}
+
               <div className="form-actions">
-                <button className="save-btn">🚀 Add/Update Project</button>
-                <button className="cancel-btn">❌ Cancel</button>
+                <button className="save-btn" onClick={handleProjectsSave}>🚀 Add/Update Project</button>
+                <button className="cancel-btn" onClick={() => {
+                  setProjectImage(null);
+                  setProjectData({
+                    type: '',
+                    title: '',
+                    description: '',
+                    videoUrl: '',
+                    techStack: '',
+                    responsibilities: ''
+                  });
+                }}>❌ Cancel</button>
               </div>
             </div>
           </div>
@@ -349,34 +726,83 @@ function Admin() {
             <div className="experience-form">
               <div className="form-grid">
                 <div className="form-group">
-                  <label>Position</label>
-                  <input type="text" placeholder="e.g., Senior Software Engineer" className="admin-input" />
+                  <label>Position<span className="required">*</span></label>
+                  <input 
+                    type="text" 
+                    placeholder="e.g., Senior Software Engineer" 
+                    className="admin-input"
+                    value={experienceData.role}
+                    onChange={(e) => setExperienceData({ ...experienceData, role: e.target.value })}
+                    required
+                  />
                 </div>
 
                 <div className="form-group">
-                  <label>Company Name & Duration</label>
-                  <input type="text" placeholder="e.g., Tech Solutions Inc. (2020-2023)" className="admin-input" />
+                  <label>Company Name & Duration<span className="required">*</span></label>
+                  <input 
+                    type="text" 
+                    placeholder="e.g., Tech Solutions Inc. (2020-2023)" 
+                    className="admin-input"
+                    value={experienceData.companyDuration}
+                    onChange={(e) => setExperienceData({ ...experienceData, companyDuration: e.target.value })}
+                    required
+                  />
                 </div>
 
                 <div className="form-group full-width">
-                  <label>Skills</label>
-                  <input type="text" placeholder="e.g., React, Node.js, Leadership" className="admin-input" />
+                  <label>Skills<span className="required">*</span></label>
+                  <input 
+                    type="text" 
+                    placeholder="e.g., React, Node.js, Leadership" 
+                    className="admin-input"
+                    value={experienceData.skills}
+                    onChange={(e) => setExperienceData({ ...experienceData, skills: e.target.value })}
+                    required
+                  />
                 </div>
 
                 <div className="form-group full-width">
-                  <label>About Company</label>
-                  <textarea placeholder="Describe the company briefly" className="admin-textarea" rows="2"></textarea>
+                  <label>About Company<span className="required">*</span></label>
+                  <textarea 
+                    placeholder="Describe the company briefly" 
+                    className="admin-textarea" 
+                    rows="2"
+                    value={experienceData.about}
+                    onChange={(e) => setExperienceData({ ...experienceData, about: e.target.value })}
+                    required
+                  ></textarea>
                 </div>
 
                 <div className="form-group full-width">
-                  <label>Responsibilities</label>
-                  <textarea placeholder="List your responsibilities and achievements" className="admin-textarea" rows="4"></textarea>
+                  <label>Responsibilities<span className="required">*</span></label>
+                  <textarea 
+                    placeholder="List your responsibilities and achievements" 
+                    className="admin-textarea" 
+                    rows="4"
+                    value={experienceData.responsibilities}
+                    onChange={(e) => setExperienceData({ ...experienceData, responsibilities: e.target.value })}
+                    required
+                  ></textarea>
                 </div>
               </div>
+
+              {message.text && (
+                <div className={`message ${message.type}`}>
+                  {message.text}
+                </div>
+              )}
               
               <div className="form-actions">
-                <button className="save-btn">💼 Save Experience</button>
-                <button className="cancel-btn">❌ Cancel</button>
+                <button className="save-btn" onClick={handleExperienceSave}>💼 Save Experience</button>
+                <button className="cancel-btn" onClick={() => {
+                  setExperienceData({
+                    role: '',
+                    companyDuration: '',
+                    skills: '',
+                    about: '',
+                    responsibilities: ''
+                  });
+                }}>❌ Cancel</button>
               </div>
             </div>
           </div>
@@ -400,7 +826,13 @@ function Admin() {
                       accept="image/*"
                       onChange={(e) => {
                         const file = e.target.files?.[0]
-                        if (file) setContactImage(URL.createObjectURL(file))
+                        if (file) {
+                          const reader = new FileReader();
+                          reader.onloadend = () => {
+                            setContactImage(reader.result);
+                          };
+                          reader.readAsDataURL(file);
+                        }
                       }}
                       style={{ display: 'none' }}
                       id="contact-image-input"
@@ -439,28 +871,60 @@ function Admin() {
             <div className="credentials-form">
               <div className="form-grid">
                 <div className="form-group">
-                  <label>Type</label>
+                  <label>Type<span className="required">*</span></label>
                   <div className="radio-group">
                     <label className="radio-option">
-                      <input type="radio" name="credential-type" />
+                      <input 
+                        type="radio" 
+                        name="credential-type" 
+                        value="Course"
+                        checked={credentialsData.type === 'Course'}
+                        onChange={(e) => setCredentialsData({ ...credentialsData, type: e.target.value })}
+                        required
+                      />
                       <span>Course</span>
                     </label>
                     <label className="radio-option">
-                      <input type="radio" name="credential-type" />
+                      <input 
+                        type="radio" 
+                        name="credential-type" 
+                        value="Certification"
+                        checked={credentialsData.type === 'Certification'}
+                        onChange={(e) => setCredentialsData({ ...credentialsData, type: e.target.value })}
+                        required
+                      />
                       <span>Certification</span>
                     </label>
                   </div>
                 </div>
 
                 <div className="form-group full-width">
-                  <label>Description</label>
-                  <textarea placeholder="Describe the course or certification" className="admin-textarea" rows="3"></textarea>
+                  <label>Description<span className="required">*</span></label>
+                  <textarea 
+                    placeholder="Describe the course or certification" 
+                    className="admin-textarea" 
+                    rows="3"
+                    value={credentialsData.description}
+                    onChange={(e) => setCredentialsData({ ...credentialsData, description: e.target.value })}
+                    required
+                  ></textarea>
                 </div>
               </div>
 
+              {message.text && (
+                <div className={`message ${message.type}`}>
+                  {message.text}
+                </div>
+              )}
+
               <div className="form-actions">
-                <button className="save-btn">🎓 Save Credential</button>
-                <button className="cancel-btn">❌ Cancel</button>
+                <button className="save-btn" onClick={handleCredentialsSave}>🎓 Save Credential</button>
+                <button className="cancel-btn" onClick={() => {
+                  setCredentialsData({
+                    type: '',
+                    description: ''
+                  });
+                }}>❌ Cancel</button>
               </div>
             </div>
           </div>
