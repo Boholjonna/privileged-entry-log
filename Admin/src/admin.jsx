@@ -850,7 +850,7 @@ function Admin() {
 
                 <div className="form-group">
                   <label>Title</label>
-                  <input type="text" placeholder="e.g., Get in touch" className="admin-input" />
+                  <input type="text" placeholder="e.g., Get in touch" className="admin-input" value={contactData.title} onChange={e => setContactData({ title: e.target.value || '' })} />
                 </div>
               </div>
 
@@ -862,7 +862,7 @@ function Admin() {
           </div>
         );
       
-      case 'credentials':
+                      <button className="save-btn" onClick={handleContactSave}>📧 Save Contact</button>
         return (
           <div className="section-content">
             <div className="section-header">
