@@ -166,14 +166,16 @@ function Admin() {
 
       const { error } = await supabase
         .from('Projects')
-        .insert([{
-          type: projectData.type,
-          'image-url': imageUrl,
-          'video-url': projectData.videoUrl,
-          description: projectData.description,
-          stack: projectData.techStack,
-          responsibilities: projectData.responsibilities
-        }]);
+          .insert([{
+            type: projectData.type,
+            title: projectData.title,
+            'image-url': imageUrl,
+            'video-url': projectData.videoUrl,
+            description: projectData.description,
+            stack: projectData.techStack,
+            responsibilities: projectData.responsibilities,
+            user_id: userId
+          }]);
 
       if (error) throw error;
       showMessage('Project saved successfully!');
