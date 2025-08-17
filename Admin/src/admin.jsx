@@ -289,14 +289,16 @@ function Admin() {
       }
 
       const imageUrl = await uploadImage(contactImage, 'images');
+      console.log('Uploading contact image, got URL:', imageUrl);
 
-      const { error } = await supabase
+      const { data, error, status, statusText } = await supabase
         .from('ContactMedia')
         .insert([{
           'image-url': imageUrl,
           title: contactData.title,
           user_id: userId
         }]);
+      console.log('Supabase insert response:', { data, error, status, statusText });
 
       if (error) {
         console.error('Insert error:', error);
@@ -310,7 +312,11 @@ function Admin() {
       setContactData({ title: '' });
     } catch (error) {
       console.error('Save error:', error);
-      showMessage(error.message, 'error');
+      if (error && error.message) {
+        showMessage(error.message, 'error');
+      } else {
+        showMessage('Unknown error occurred while saving contact.', 'error');
+      }
     }
   };
 
@@ -817,7 +823,6 @@ function Admin() {
               <h3>Contact Section</h3>
               <p>Manage social media icons and contact title</p>
             </div>
-            
             <div className="contact-form">
               <div className="form-grid">
                 <div className="form-group">
@@ -854,9 +859,15 @@ function Admin() {
                 </div>
               </div>
 
+              {message.text && (
+                <div className={`message ${message.type}`}>
+                  {message.text}
+                </div>
+              )}
+
               <div className="form-actions">
-                <button className="save-btn">📧 Save Contact</button>
-                <button className="cancel-btn">❌ Cancel</button>
+                <button className="save-btn" onClick={handleContactSave}>📧 Save Contact</button>
+                <button className="cancel-btn" onClick={() => setContactData({ title: '' })}>❌ Cancel</button>
               </div>
             </div>
           </div>
