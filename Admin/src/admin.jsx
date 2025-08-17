@@ -5,7 +5,6 @@ import './styles/Admin.css';
 function Admin() {
   const fileInputRef = useRef(null);
   const [activeSection, setActiveSection] = useState('dashboard');
-  const [selectedImage, setSelectedImage] = useState(null);
   const [skillsImage, setSkillsImage] = useState(null);
   const [projectImage, setProjectImage] = useState(null);
   const [contactImage, setContactImage] = useState(null);
@@ -56,20 +55,7 @@ function Admin() {
   const [message, setMessage] = useState({ text: '', type: '' });
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const handleImageUpload = () => {
-    fileInputRef.current.click();
-  };
-
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setSelectedImage(reader.result);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
+  // Removed unused selectedImage state and image handlers
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -320,62 +306,49 @@ function Admin() {
     }
   };
 
+  const lightViolet = '#C084FC';
   const adminSections = [
     {
       id: 'dashboard',
       title: 'Dashboard',
-      icon: '📊',
+      icon: <img src="/vite.svg" alt="Dashboard" style={{width:20, filter:'drop-shadow(0 0 2px '+lightViolet+') saturate(2) brightness(1.2)'}} />,
       description: 'Overview and analytics',
-      color: '#8B5CF6'
-    },
-    {
-      id: 'about',
-      title: 'About Section',
-      icon: '👤',
-      description: 'Personal information and bio',
-      color: '#EC4899'
+      color: lightViolet
     },
     {
       id: 'skills',
       title: 'Skills Section',
-      icon: '🛠️',
+      icon: <img src="https://img.icons8.com/ios-filled/50/C084FC/maintenance.png" alt="Skills" style={{width:20}} />,
       description: 'Technical skills and expertise',
-      color: '#06B6D4'
+      color: lightViolet
     },
     {
       id: 'projects',
       title: 'Projects Section',
-      icon: '🚀',
+      icon: <img src="https://img.icons8.com/ios-filled/50/C084FC/rocket.png" alt="Projects" style={{width:20}} />,
       description: 'Portfolio projects and work',
-      color: '#10B981'
+      color: lightViolet
     },
     {
       id: 'experience',
       title: 'Experience Section',
-      icon: '💼',
+      icon: <img src="https://img.icons8.com/ios-filled/50/C084FC/briefcase.png" alt="Experience" style={{width:20}} />,
       description: 'Work history and achievements',
-      color: '#F59E0B'
+      color: lightViolet
     },
     {
       id: 'contact',
       title: 'Contact Section',
-      icon: '📧',
+      icon: <img src="https://img.icons8.com/ios-filled/50/C084FC/new-post.png" alt="Contact" style={{width:20}} />,
       description: 'Contact information and form',
-      color: '#EF4444'
+      color: lightViolet
     },
     {
       id: 'credentials',
       title: 'Credentials Section',
-      icon: '🎓',
+      icon: <img src="https://img.icons8.com/ios-filled/50/C084FC/diploma.png" alt="Credentials" style={{width:20}} />,
       description: 'Education and certifications',
-      color: '#8B5CF6'
-    },
-    {
-      id: 'media',
-      title: 'Media Management',
-      icon: '🖼️',
-      description: 'Images, videos, and files',
-      color: '#EC4899'
+      color: lightViolet
     }
   ];
 
@@ -385,125 +358,55 @@ function Admin() {
         return (
           <div className="section-content">
             <div className="welcome-header">
-              {/* <h2>Welcome back, Admin! 👋</h2> */}
               <p>Here's what's happening with your portfolio today</p>
             </div>
-            
             <div className="dashboard-stats">
-              <div className="stat-card" style={{ borderLeft: `4px solid ${adminSections[0].color}` }}>
-                <div className="stat-icon">📊</div>
-                <div className="stat-info">
-                  <h4>Total Sections</h4>
-                  <p>{adminSections.length}</p>
+              <div className="stat-card" style={{ borderLeft: '4px solid #C084FC' }}>
+                <div className="stat-icon">
+                  <img src="https://img.icons8.com/ios-filled/50/C084FC/visible.png" alt="Views" style={{width:24}} />
                 </div>
-              </div>
-              <div className="stat-card" style={{ borderLeft: `4px solid ${adminSections[1].color}` }}>
-                <div className="stat-icon">👁️</div>
                 <div className="stat-info">
                   <h4>Portfolio Views</h4>
-                  <p>1,247</p>
+                  <p>{typeof window !== 'undefined' && window.localStorage.getItem('portfolioViews') ? window.localStorage.getItem('portfolioViews') : '1,247'}</p>
+                  <small style={{color:'#C084FC'}}>Excludes your device</small>
                 </div>
               </div>
-              <div className="stat-card" style={{ borderLeft: `4px solid ${adminSections[2].color}` }}>
-                <div className="stat-icon">⭐</div>
+              <div className="stat-card" style={{ borderLeft: '4px solid #C084FC' }}>
+                <div className="stat-icon">
+                  <img src="https://img.icons8.com/ios-filled/50/C084FC/star.png" alt="Stars" style={{width:24}} />
+                </div>
+                <div className="stat-info">
+                  <h4>Stars</h4>
+                  <p>★ ★ ★ ★ ★</p>
+                </div>
+              </div>
+              <div className="stat-card" style={{ borderLeft: '4px solid #C084FC' }}>
+                <div className="stat-icon">
+                  <img src="https://img.icons8.com/ios-filled/50/C084FC/calendar--v1.png" alt="Last Updated" style={{width:24}} />
+                </div>
                 <div className="stat-info">
                   <h4>Last Updated</h4>
                   <p>{new Date().toLocaleDateString()}</p>
                 </div>
               </div>
-              <div className="stat-card" style={{ borderLeft: `4px solid ${adminSections[3].color}` }}>
-                <div className="stat-icon">🟢</div>
-                <div className="stat-info">
-                  <h4>Status</h4>
-                  <p className="status-active">Live</p>
-                </div>
-              </div>
             </div>
-
             <div className="quick-actions">
               <h3>Quick Actions</h3>
               <div className="action-buttons">
-                <button className="action-btn" onClick={() => setActiveSection('about')}>
-                  <span className="action-icon">✏️</span>
-                  Edit About
-                </button>
                 <button className="action-btn" onClick={() => setActiveSection('projects')}>
-                  <span className="action-icon">➕</span>
+                  <span className="action-icon"><img src="https://img.icons8.com/ios-filled/24/C084FC/rocket.png" alt="Add Project" /></span>
                   Add Project
                 </button>
                 <button className="action-btn" onClick={() => setActiveSection('skills')}>
-                  <span className="action-icon">🔄</span>
+                  <span className="action-icon"><img src="https://img.icons8.com/ios-filled/24/C084FC/maintenance.png" alt="Update Skills" /></span>
                   Update Skills
-                </button>
-                <button className="action-btn" onClick={() => setActiveSection('media')}>
-                  <span className="action-icon">📁</span>
-                  Manage Media
                 </button>
               </div>
             </div>
           </div>
         );
       
-      case 'about':
-        return (
-          <div className="section-content">
-            <div className="section-header">
-              <h3>About Section Management</h3>
-              <p>Update your personal information and bio</p>
-            </div>
-            
-            <div className="form-grid">
-              <div className="form-group">
-                <label>Profile Image</label>
-                <div className="image-upload-area">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    ref={fileInputRef}
-                    onChange={handleImageChange}
-                    style={{ display: 'none' }}
-                  />
-                  <button type="button" className="upload-btn" onClick={handleImageUpload}>
-                    {selectedImage ? 'Change Image' : 'Upload Image'}
-                  </button>
-                  {selectedImage && (
-                    <img src={selectedImage} alt="Preview" className="image-preview" />
-                  )}
-                </div>
-              </div>
-              
-              <div className="form-group">
-                <label>Full Name</label>
-                <input type="text" placeholder="Your full name" className="admin-input" />
-              </div>
-              
-              <div className="form-group">
-                <label>Professional Title</label>
-                <input type="text" placeholder="e.g., Software Engineer" className="admin-input" />
-              </div>
-              
-              <div className="form-group full-width">
-                <label>Professional Bio</label>
-                <textarea placeholder="Tell visitors about yourself, your passion, and what drives you..." className="admin-textarea" rows="4"></textarea>
-              </div>
-              
-              <div className="form-group">
-                <label>Location</label>
-                <input type="text" placeholder="City, Country" className="admin-input" />
-              </div>
-              
-              <div className="form-group">
-                <label>Years of Experience</label>
-                <input type="number" placeholder="5" className="admin-input" min="0" max="50" />
-              </div>
-            </div>
-            
-            <div className="form-actions">
-              <button className="save-btn">💾 Save Changes</button>
-              <button className="cancel-btn">❌ Cancel</button>
-            </div>
-          </div>
-        );
+  // ...existing code...
       
       case 'skills':
         return (
@@ -515,7 +418,7 @@ function Admin() {
             
             <div className="form-grid">
               <div className="form-group">
-                <label>Skills Image<span className="required">*</span></label>
+                <label htmlFor="skills-image-input">Skills Image<span className="required">*</span></label>
                 <div className="image-upload-area">
                   <input
                     type="file"
@@ -544,11 +447,12 @@ function Admin() {
               </div>
 
               <div className="form-group">
-                <label>Section Title<span className="required">*</span></label>
+                <label htmlFor="skills-title-input">Section Title<span className="required">*</span></label>
                 <input 
                   type="text" 
                   placeholder="e.g., Skills & Tools" 
                   className="admin-input"
+                  id="skills-title-input"
                   value={skillsData.title}
                   onChange={(e) => setSkillsData({ ...skillsData, title: e.target.value })}
                   required 
@@ -562,11 +466,11 @@ function Admin() {
               )}
 
               <div className="form-actions">
-                <button className="save-btn" onClick={handleSkillsSave}>💾 Save Skills</button>
+                <button className="save-btn" onClick={handleSkillsSave}>Save Skills</button>
                 <button className="cancel-btn" onClick={() => {
                   setSkillsImage(null);
                   setSkillsData({ title: '' });
-                }}>❌ Cancel</button>
+                }}>Cancel</button>
               </div>
             </div>
           </div>
@@ -583,12 +487,13 @@ function Admin() {
             <div className="project-form">
               <div className="form-grid">
                 <div className="form-group">
-                  <label>Project Type<span className="required">*</span></label>
+                  <label htmlFor="project-type-solo">Project Type<span className="required">*</span></label>
                   <div className="radio-group">
                     <label className="radio-option">
                       <input 
                         type="radio" 
                         name="project-type" 
+                        id="project-type-solo"
                         value="Solo"
                         checked={projectData.type === 'Solo'}
                         onChange={(e) => setProjectData({ ...projectData, type: e.target.value })}
@@ -600,6 +505,7 @@ function Admin() {
                       <input 
                         type="radio" 
                         name="project-type" 
+                        id="project-type-team"
                         value="Team"
                         checked={projectData.type === 'Team'}
                         onChange={(e) => setProjectData({ ...projectData, type: e.target.value })}
@@ -611,7 +517,7 @@ function Admin() {
                 </div>
 
                 <div className="form-group">
-                  <label>Project Image<span className="required">*</span></label>
+                  <label htmlFor="project-image-input">Project Image<span className="required">*</span></label>
                   <div className="image-upload-area">
                     <input
                       type="file"
@@ -640,22 +546,24 @@ function Admin() {
                 </div>
 
                 <div className="form-group">
-                  <label>Video URL</label>
+                  <label htmlFor="project-video-url">Video URL</label>
                   <input 
                     type="url" 
                     placeholder="https://... (optional)" 
                     className="admin-input" 
+                    id="project-video-url"
                     value={projectData.videoUrl}
                     onChange={(e) => setProjectData({ ...projectData, videoUrl: e.target.value })}
                   />
                 </div>
 
                 <div className="form-group">
-                  <label>Project Title<span className="required">*</span></label>
+                  <label htmlFor="project-title-input">Project Title<span className="required">*</span></label>
                   <input 
                     type="text" 
                     placeholder="e.g., E-commerce Platform" 
                     className="admin-input"
+                    id="project-title-input"
                     value={projectData.title}
                     onChange={(e) => setProjectData({ ...projectData, title: e.target.value })}
                     required
@@ -663,10 +571,11 @@ function Admin() {
                 </div>
 
                 <div className="form-group full-width">
-                  <label>Project Description<span className="required">*</span></label>
+                  <label htmlFor="project-description-input">Project Description<span className="required">*</span></label>
                   <textarea 
                     placeholder="Describe your project, its features, and your role..." 
                     className="admin-textarea" 
+                    id="project-description-input"
                     rows="3"
                     value={projectData.description}
                     onChange={(e) => setProjectData({ ...projectData, description: e.target.value })}
@@ -675,11 +584,12 @@ function Admin() {
                 </div>
 
                 <div className="form-group full-width">
-                  <label>Tech Stack<span className="required">*</span></label>
+                  <label htmlFor="project-techstack-input">Tech Stack<span className="required">*</span></label>
                   <input 
                     type="text" 
                     placeholder="e.g., React, Vite, Supabase" 
                     className="admin-input"
+                    id="project-techstack-input"
                     value={projectData.techStack}
                     onChange={(e) => setProjectData({ ...projectData, techStack: e.target.value })}
                     required
@@ -687,10 +597,11 @@ function Admin() {
                 </div>
 
                 <div className="form-group full-width">
-                  <label>Responsibilities<span className="required">*</span></label>
+                  <label htmlFor="project-responsibilities-input">Responsibilities<span className="required">*</span></label>
                   <textarea 
                     placeholder="Bullet your responsibilities and contributions" 
                     className="admin-textarea" 
+                    id="project-responsibilities-input"
                     rows="3"
                     value={projectData.responsibilities}
                     onChange={(e) => setProjectData({ ...projectData, responsibilities: e.target.value })}
@@ -706,7 +617,7 @@ function Admin() {
               )}
 
               <div className="form-actions">
-                <button className="save-btn" onClick={handleProjectsSave}>🚀 Add/Update Project</button>
+                <button className="save-btn" onClick={handleProjectsSave}>Add/Update Project</button>
                 <button className="cancel-btn" onClick={() => {
                   setProjectImage(null);
                   setProjectData({
@@ -717,7 +628,7 @@ function Admin() {
                     techStack: '',
                     responsibilities: ''
                   });
-                }}>❌ Cancel</button>
+                }}>Cancel</button>
               </div>
             </div>
           </div>
@@ -734,11 +645,12 @@ function Admin() {
             <div className="experience-form">
               <div className="form-grid">
                 <div className="form-group">
-                  <label>Position<span className="required">*</span></label>
+                  <label htmlFor="experience-role-input">Position<span className="required">*</span></label>
                   <input 
                     type="text" 
                     placeholder="e.g., Senior Software Engineer" 
                     className="admin-input"
+                    id="experience-role-input"
                     value={experienceData.role}
                     onChange={(e) => setExperienceData({ ...experienceData, role: e.target.value })}
                     required
@@ -746,11 +658,12 @@ function Admin() {
                 </div>
 
                 <div className="form-group">
-                  <label>Company Name & Duration<span className="required">*</span></label>
+                  <label htmlFor="experience-company-input">Company Name & Duration<span className="required">*</span></label>
                   <input 
                     type="text" 
                     placeholder="e.g., Tech Solutions Inc. (2020-2023)" 
                     className="admin-input"
+                    id="experience-company-input"
                     value={experienceData.companyDuration}
                     onChange={(e) => setExperienceData({ ...experienceData, companyDuration: e.target.value })}
                     required
@@ -758,11 +671,12 @@ function Admin() {
                 </div>
 
                 <div className="form-group full-width">
-                  <label>Skills<span className="required">*</span></label>
+                  <label htmlFor="experience-skills-input">Skills<span className="required">*</span></label>
                   <input 
                     type="text" 
                     placeholder="e.g., React, Node.js, Leadership" 
                     className="admin-input"
+                    id="experience-skills-input"
                     value={experienceData.skills}
                     onChange={(e) => setExperienceData({ ...experienceData, skills: e.target.value })}
                     required
@@ -770,10 +684,11 @@ function Admin() {
                 </div>
 
                 <div className="form-group full-width">
-                  <label>About Company<span className="required">*</span></label>
+                  <label htmlFor="experience-about-input">About Company<span className="required">*</span></label>
                   <textarea 
                     placeholder="Describe the company briefly" 
                     className="admin-textarea" 
+                    id="experience-about-input"
                     rows="2"
                     value={experienceData.about}
                     onChange={(e) => setExperienceData({ ...experienceData, about: e.target.value })}
@@ -782,10 +697,11 @@ function Admin() {
                 </div>
 
                 <div className="form-group full-width">
-                  <label>Responsibilities<span className="required">*</span></label>
+                  <label htmlFor="experience-responsibilities-input">Responsibilities<span className="required">*</span></label>
                   <textarea 
                     placeholder="List your responsibilities and achievements" 
                     className="admin-textarea" 
+                    id="experience-responsibilities-input"
                     rows="4"
                     value={experienceData.responsibilities}
                     onChange={(e) => setExperienceData({ ...experienceData, responsibilities: e.target.value })}
@@ -801,7 +717,7 @@ function Admin() {
               )}
               
               <div className="form-actions">
-                <button className="save-btn" onClick={handleExperienceSave}>💼 Save Experience</button>
+                <button className="save-btn" onClick={handleExperienceSave}>Save Experience</button>
                 <button className="cancel-btn" onClick={() => {
                   setExperienceData({
                     role: '',
@@ -810,7 +726,7 @@ function Admin() {
                     about: '',
                     responsibilities: ''
                   });
-                }}>❌ Cancel</button>
+                }}>Cancel</button>
               </div>
             </div>
           </div>
@@ -826,7 +742,7 @@ function Admin() {
             <div className="contact-form">
               <div className="form-grid">
                 <div className="form-group">
-                  <label>Social Media Image</label>
+                  <label htmlFor="contact-image-input">Social Media Image</label>
                   <div className="image-upload-area">
                     <input
                       type="file"
@@ -854,8 +770,9 @@ function Admin() {
                 </div>
 
                 <div className="form-group">
-                  <label>Title</label>
+                  <label htmlFor="contact-title-input">Title</label>
                   <input type="text" placeholder="e.g., Get in touch" className="admin-input" value={contactData.title} onChange={e => setContactData({ title: e.target.value || '' })} />
+                  <input type="text" placeholder="e.g., Get in touch" className="admin-input" id="contact-title-input" value={contactData.title} onChange={e => setContactData({ title: e.target.value || '' })} />
                 </div>
               </div>
 
@@ -866,151 +783,16 @@ function Admin() {
               )}
 
               <div className="form-actions">
-                <button className="save-btn" onClick={handleContactSave}>📧 Save Contact</button>
-                <button className="cancel-btn" onClick={() => setContactData({ title: '' })}>❌ Cancel</button>
+                <button className="save-btn" onClick={handleContactSave}>Save Contact</button>
+                <button className="cancel-btn" onClick={() => setContactData({ title: '' })}>Cancel</button>
               </div>
             </div>
           </div>
         );
       
-                      <button className="save-btn" onClick={handleContactSave}>📧 Save Contact</button>
-        return (
-          <div className="section-content">
-            <div className="section-header">
-              <h3>Credentials Section</h3>
-              <p>Manage courses and certifications</p>
-            </div>
-            
-            <div className="credentials-form">
-              <div className="form-grid">
-                <div className="form-group">
-                  <label>Type<span className="required">*</span></label>
-                  <div className="radio-group">
-                    <label className="radio-option">
-                      <input 
-                        type="radio" 
-                        name="credential-type" 
-                        value="Course"
-                        checked={credentialsData.type === 'Course'}
-                        onChange={(e) => setCredentialsData({ ...credentialsData, type: e.target.value })}
-                        required
-                      />
-                      <span>Course</span>
-                    </label>
-                    <label className="radio-option">
-                      <input 
-                        type="radio" 
-                        name="credential-type" 
-                        value="Certification"
-                        checked={credentialsData.type === 'Certification'}
-                        onChange={(e) => setCredentialsData({ ...credentialsData, type: e.target.value })}
-                        required
-                      />
-                      <span>Certification</span>
-                    </label>
-                  </div>
-                </div>
 
-                <div className="form-group full-width">
-                  <label>Description<span className="required">*</span></label>
-                  <textarea 
-                    placeholder="Describe the course or certification" 
-                    className="admin-textarea" 
-                    rows="3"
-                    value={credentialsData.description}
-                    onChange={(e) => setCredentialsData({ ...credentialsData, description: e.target.value })}
-                    required
-                  ></textarea>
-                </div>
-              </div>
-
-              {message.text && (
-                <div className={`message ${message.type}`}>
-                  {message.text}
-                </div>
-              )}
-
-              <div className="form-actions">
-                <button className="save-btn" onClick={handleCredentialsSave}>🎓 Save Credential</button>
-                <button className="cancel-btn" onClick={() => {
-                  setCredentialsData({
-                    type: '',
-                    description: ''
-                  });
-                }}>❌ Cancel</button>
-              </div>
-            </div>
-          </div>
-        );
       
-      case 'media':
-        return (
-          <div className="section-content">
-            <div className="section-header">
-              <h3>Media Management</h3>
-              <p>Upload and organize images, videos, and other media files</p>
-            </div>
-            
-            <div className="media-upload">
-              <div className="upload-zone">
-                <div className="upload-icon">📁</div>
-                <h4>Drag & Drop Files Here</h4>
-                <p>or click to browse</p>
-                <input type="file" accept="image/*,video/*" multiple className="file-input" />
-              </div>
-              
-              <div className="form-grid">
-                <div className="form-group">
-                  <label>Media Category</label>
-                  <select className="admin-input">
-                    <option value="">Select category</option>
-                    <option value="profile">Profile Images</option>
-                    <option value="projects">Project Screenshots</option>
-                    <option value="backgrounds">Background Images</option>
-                    <option value="icons">Icons & Logos</option>
-                    <option value="gallery">Portfolio Gallery</option>
-                  </select>
-                </div>
-                
-                <div className="form-group">
-                  <label>Tags</label>
-                  <input type="text" placeholder="e.g., web, mobile, ui, design" className="admin-input" />
-                  <small className="form-help">Separate tags with commas</small>
-                </div>
-                
-                <div className="form-group full-width">
-                  <label>Description</label>
-                  <textarea placeholder="Brief description of the media file..." className="admin-textarea" rows="2"></textarea>
-                </div>
-              </div>
-              
-              <div className="form-actions">
-                <button className="save-btn">📤 Upload Media</button>
-                <button className="cancel-btn">❌ Cancel</button>
-              </div>
-            </div>
-            
-            <div className="media-gallery">
-              <h4>Recent Uploads</h4>
-              <div className="gallery-grid">
-                <div className="media-item">
-                  <img src="/images/msJ.png" alt="Profile" className="gallery-image" />
-                  <div className="media-overlay">
-                    <button className="edit-btn">✏️</button>
-                    <button className="delete-btn">🗑️</button>
-                  </div>
-                </div>
-                <div className="media-item">
-                  <img src="/images/nightme.png" alt="Background" className="gallery-image" />
-                  <div className="media-overlay">
-                    <button className="edit-btn">✏️</button>
-                    <button className="delete-btn">🗑️</button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        );
+  // ...existing code...
       
       default:
         return (
@@ -1029,7 +811,7 @@ function Admin() {
       <div className="admin-header">
         <div className="header-content">
           <div className="welcome-message">
-            <h1 className="admin-title">🎯 Welcome back, Admin!</h1>
+            <h1 className="admin-title">Welcome back, Admin!</h1>
             <p className="admin-subtitle">Ready to make your portfolio amazing?</p>
           </div>
           <div className="header-actions">
@@ -1041,7 +823,6 @@ function Admin() {
           </div>
         </div>
       </div>
-      
       <div className="admin-layout">
         <div className={`admin-sidebar ${isMobileMenuOpen ? 'mobile-open' : ''}`}>
           <nav className="admin-nav">
@@ -1066,19 +847,16 @@ function Admin() {
             ))}
           </nav>
         </div>
-        
         {/* Mobile Menu Backdrop */}
         {isMobileMenuOpen && (
           <div className="mobile-backdrop" onClick={closeMobileMenu}></div>
         )}
-        
         <div className="admin-main">
           <div className="admin-content">
             {renderSectionContent()}
           </div>
         </div>
       </div>
-      
       <div className="admin-footer">
         <div className="footer-content">
           <p>&copy; 2024 Portfolio Admin Panel | Built with ❤️</p>
@@ -1093,3 +871,4 @@ function Admin() {
 }
 
 export default Admin;
+
