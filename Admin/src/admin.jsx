@@ -362,10 +362,10 @@ function Admin() {
               <p>Add your courses or certifications</p>
             </div>
             <div className="form-grid">
-              <div className="form-group">
+              <div className="form-group" style={{ marginBottom: '20px' }}>
                 <label>Type<span className="required">*</span></label>
-                <div className="radio-group">
-                  <label className="radio-option">
+                <div className="radio-group" style={{ display: 'flex', flexDirection: 'row', gap: '32px', justifyContent: 'flex-start', alignItems: 'center', flexWrap: 'nowrap' }}>
+                  <label className="radio-option" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '12px 32px', border: '2px solid #332e4d', borderRadius: '50px' }}>
                     <input
                       type="radio"
                       name="credentials-type"
@@ -374,9 +374,9 @@ function Admin() {
                       onChange={e => setCredentialsData({ ...credentialsData, type: e.target.value })}
                       required
                     />
-                    <span>Course</span>
+                    <span style={{ fontWeight: 'bold', color: 'white', fontSize: '1.2em', letterSpacing: '2px' }}>COURSE</span>
                   </label>
-                  <label className="radio-option">
+                  <label className="radio-option" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '12px 32px', border: '2px solid #332e4d', borderRadius: '50px' }}>
                     <input
                       type="radio"
                       name="credentials-type"
@@ -385,7 +385,7 @@ function Admin() {
                       onChange={e => setCredentialsData({ ...credentialsData, type: e.target.value })}
                       required
                     />
-                    <span>Certification</span>
+                    <span style={{ fontWeight: 'bold', color: 'white', fontSize: '1.2em', letterSpacing: '2px' }}>CERTIFICATION</span>
                   </label>
                 </div>
               </div>
@@ -548,7 +548,7 @@ function Admin() {
                 <div className="form-group">
                   <label htmlFor="project-type-solo">Project Type<span className="required">*</span></label>
                   <div className="radio-group">
-                    <label className="radio-option">
+                    <label className="radio-option" style={{ marginRight: '32px', display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '12px 32px', border: '2px solid #332e4d', borderRadius: '50px' }}>
                       <input 
                         type="radio" 
                         name="project-type" 
@@ -558,9 +558,9 @@ function Admin() {
                         onChange={(e) => setProjectData({ ...projectData, type: e.target.value })}
                         required
                       />
-                      <span>Solo</span>
+                      <span style={{ fontWeight: 'bold', color: 'white', fontSize: '1.2em', letterSpacing: '2px' }}>SOLO</span>
                     </label>
-                    <label className="radio-option">
+                    <label className="radio-option" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '12px 32px', border: '2px solid #332e4d', borderRadius: '50px' }}>
                       <input 
                         type="radio" 
                         name="project-type" 
@@ -570,7 +570,7 @@ function Admin() {
                         onChange={(e) => setProjectData({ ...projectData, type: e.target.value })}
                         required
                       />
-                      <span>Team</span>
+                      <span style={{ fontWeight: 'bold', color: 'white', fontSize: '1.2em', letterSpacing: '2px' }}>TEAM</span>
                     </label>
                   </div>
                 </div>
