@@ -354,6 +354,65 @@ function Admin() {
 
   const renderSectionContent = () => {
     switch (activeSection) {
+      case 'credentials':
+        return (
+          <div className="section-content">
+            <div className="section-header">
+              <h3>Credentials Section</h3>
+              <p>Add your courses or certifications</p>
+            </div>
+            <div className="form-grid">
+              <div className="form-group">
+                <label>Type<span className="required">*</span></label>
+                <div className="radio-group">
+                  <label className="radio-option">
+                    <input
+                      type="radio"
+                      name="credentials-type"
+                      value="course"
+                      checked={credentialsData.type === 'course'}
+                      onChange={e => setCredentialsData({ ...credentialsData, type: e.target.value })}
+                      required
+                    />
+                    <span>Course</span>
+                  </label>
+                  <label className="radio-option">
+                    <input
+                      type="radio"
+                      name="credentials-type"
+                      value="certification"
+                      checked={credentialsData.type === 'certification'}
+                      onChange={e => setCredentialsData({ ...credentialsData, type: e.target.value })}
+                      required
+                    />
+                    <span>Certification</span>
+                  </label>
+                </div>
+              </div>
+              <div className="form-group full-width">
+                <label htmlFor="credentials-description-input">Description<span className="required">*</span></label>
+                <input
+                  type="text"
+                  placeholder="e.g., React Fundamentals, AWS Certified"
+                  className="admin-input"
+                  id="credentials-description-input"
+                  value={credentialsData.description}
+                  onChange={e => setCredentialsData({ ...credentialsData, description: e.target.value })}
+                  required
+                />
+              </div>
+              {message.text && (
+                <div className={`message ${message.type}`}>
+                  {message.text}
+                </div>
+              )}
+              <div className="form-actions">
+                <button className="save-btn" onClick={handleCredentialsSave}>Save Credentials</button>
+                <button className="cancel-btn" onClick={() => setCredentialsData({ type: '', description: '' })}>Cancel</button>
+              </div>
+            </div>
+          </div>
+        );
       case 'dashboard':
         return (
           <div className="section-content">
@@ -771,7 +830,6 @@ function Admin() {
 
                 <div className="form-group">
                   <label htmlFor="contact-title-input">Title</label>
-                  <input type="text" placeholder="e.g., Get in touch" className="admin-input" value={contactData.title} onChange={e => setContactData({ title: e.target.value || '' })} />
                   <input type="text" placeholder="e.g., Get in touch" className="admin-input" id="contact-title-input" value={contactData.title} onChange={e => setContactData({ title: e.target.value || '' })} />
                 </div>
               </div>
@@ -795,14 +853,7 @@ function Admin() {
   // ...existing code...
       
       default:
-        return (
-          <div className="section-content">
-            <div className="section-header">
-              <h3>Select a section to manage</h3>
-              <p>Choose from the sidebar to start managing your portfolio</p>
-            </div>
-          </div>
-        );
+    return null;
     }
   };
 
