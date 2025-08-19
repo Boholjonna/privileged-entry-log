@@ -311,7 +311,7 @@ function Admin() {
     {
       id: 'dashboard',
       title: 'Dashboard',
-      icon: <img src="/vite.svg" alt="Dashboard" style={{width:20, filter:'drop-shadow(0 0 2px '+lightViolet+') saturate(2) brightness(1.2)'}} />,
+      icon: <img src="/favicon.svg" alt="Dashboard" style={{width:20, filter:'drop-shadow(0 0 2px '+lightViolet+') saturate(2) brightness(1.2)'}} />,
       description: 'Overview and analytics',
       color: lightViolet
     },
@@ -364,7 +364,7 @@ function Admin() {
             <div className="form-grid">
               <div className="form-group" style={{ marginBottom: '20px' }}>
                 <label>Type<span className="required">*</span></label>
-                <div className="radio-group" style={{ display: 'flex', flexDirection: 'row', gap: '32px', justifyContent: 'flex-start', alignItems: 'center', flexWrap: 'nowrap' }}>
+                <div className="radio-group" style={{ display: 'flex', flexDirection: 'row', gap: '32px', justifyContent: 'flex-start', alignItems: 'center', flexWrap: 'wrap' }}>
                   <label className="radio-option" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '12px 32px', border: '2px solid #332e4d', borderRadius: '50px' }}>
                     <input
                       type="radio"
@@ -386,6 +386,17 @@ function Admin() {
                       required
                     />
                     <span style={{ fontWeight: 'bold', color: 'white', fontSize: '1.2em', letterSpacing: '2px' }}>CERTIFICATION</span>
+                  </label>
+                  <label className="radio-option" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '12px 32px', border: '2px solid #332e4d', borderRadius: '50px' }}>
+                    <input
+                      type="radio"
+                      name="credentials-type"
+                      value="degree"
+                      checked={credentialsData.type === 'degree'}
+                      onChange={e => setCredentialsData({ ...credentialsData, type: e.target.value })}
+                      required
+                    />
+                    <span style={{ fontWeight: 'bold', color: 'white', fontSize: '1.2em', letterSpacing: '2px' }}>DEGREE</span>
                   </label>
                 </div>
               </div>
