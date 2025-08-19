@@ -572,7 +572,7 @@
   align-items: center;
   width: 100%;
   padding: 1rem;
-  background: rgba(15, 15, 35, 0.3);
+  background: transparent;
   border-radius: 16px;
   border: 1px dashed rgba(139, 92, 246, 0.3);
 }
@@ -601,7 +601,6 @@
   max-height: 200px;
   border-radius: 16px;
   border: 2px solid rgba(139, 92, 246, 0.3);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
   object-fit: cover;
 }
 

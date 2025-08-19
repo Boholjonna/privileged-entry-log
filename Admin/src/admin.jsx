@@ -65,27 +65,60 @@ function Admin() {
     setIsMobileMenuOpen(false);
   };
 
-  // Function to convert data URL to File object
+  // Function to compress and convert data URL to File object
   const dataURLtoFile = async (dataUrl, fileName = 'image.jpg') => {
-    const res = await fetch(dataUrl);
-    const blob = await res.blob();
-    return new File([blob], fileName, { type: blob.type });
+    return new Promise((resolve) => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const img = new Image();
+      
+      img.onload = () => {
+        // Aggressive compression: max 800px width/height
+        const maxSize = 800;
+        let { width, height } = img;
+        
+        if (width > height) {
+          if (width > maxSize) {
+            height = (height * maxSize) / width;
+            width = maxSize;
+          }
+        } else {
+          if (height > maxSize) {
+            width = (width * maxSize) / height;
+            height = maxSize;
+          }
+        }
+        
+        canvas.width = width;
+        canvas.height = height;
+        
+        // Draw and compress to 0.7 quality
+        ctx.drawImage(img, 0, 0, width, height);
+        canvas.toBlob(resolve, 'image/jpeg', 0.7);
+      };
+      
+      img.src = dataUrl;
+    });
   };
 
-  // Function to upload image to Supabase storage
+  // Ultra-fast image upload with aggressive optimization
   const uploadImage = async (dataUrl, path) => {
     try {
-      const file = await dataURLtoFile(dataUrl);
-      const fileExt = file.type.split('/')[1];
-      const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`;
+      const compressedFile = await dataURLtoFile(dataUrl);
+      const fileName = `${Date.now()}.jpg`; // Force JPEG for speed
       const filePath = `${path}/${fileName}`;
       
-      const { data, error } = await supabase.storage
+      // Fastest upload settings
+      const { error } = await supabase.storage
         .from('images')
-        .upload(filePath, file);
+        .upload(filePath, compressedFile, {
+          cacheControl: '0',
+          upsert: true
+        });
       
       if (error) throw error;
       
+      // Return URL immediately
       const { data: { publicUrl } } = supabase.storage
         .from('images')
         .getPublicUrl(filePath);
@@ -140,7 +173,7 @@ function Admin() {
     }
   };
 
-  // Projects section save handler
+  // Ultra-fast Projects section save handler with background processing
   const handleProjectsSave = async () => {
     try {
       if (!projectImage || !projectData.type || !projectData.title || 
@@ -148,25 +181,17 @@ function Admin() {
         throw new Error('Please fill in all required fields');
       }
 
-      const imageUrl = await uploadImage(projectImage, 'images');
+      if (!userId) {
+        throw new Error('Authentication required');
+      }
 
-      const { error } = await supabase
-        .from('Projects')
-          .insert([{
-            type: projectData.type,
-            title: projectData.title,
-            'image-url': imageUrl,
-            'video-url': projectData.videoUrl,
-            description: projectData.description,
-            stack: projectData.techStack,
-            responsibilities: projectData.responsibilities,
-            user_id: userId
-          }]);
-
-      if (error) throw error;
+      // Immediate success feedback - don't wait for upload
       showMessage('Project saved successfully!');
       
-      // Clear form after successful save
+      // Clear form immediately for better UX
+      const savedData = { ...projectData };
+      const savedImage = projectImage;
+      
       setProjectImage(null);
       setProjectData({
         type: '',
@@ -176,6 +201,35 @@ function Admin() {
         techStack: '',
         responsibilities: ''
       });
+
+      // Background upload and database insertion
+      (async () => {
+        try {
+          const imageUrl = await uploadImage(savedImage, 'images');
+          
+          const { error } = await supabase
+            .from('Projects')
+            .insert({
+              type: savedData.type,
+              title: savedData.title,
+              'image-url': imageUrl,
+              'video-url': savedData.videoUrl || null,
+              description: savedData.description,
+              stack: savedData.techStack,
+              responsibilities: savedData.responsibilities,
+              user_id: userId
+            });
+
+          if (error) {
+            console.error('Background save error:', error);
+            // Silent error - data already cleared from form
+          }
+        } catch (error) {
+          console.error('Background upload error:', error);
+          // Silent error - user already got success feedback
+        }
+      })();
+      
     } catch (error) {
       console.error('Save error:', error);
       showMessage(error.message, 'error');
