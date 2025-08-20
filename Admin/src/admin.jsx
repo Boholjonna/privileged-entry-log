@@ -33,7 +33,7 @@ function Admin() {
   const [projectData, setProjectData] = useState({
     type: '',
     title: '',
-    description: '',
+    githubUrl: '',
     videoUrl: '',
     techStack: '',
     responsibilities: ''
@@ -177,7 +177,7 @@ function Admin() {
   const handleProjectsSave = async () => {
     try {
       if (!projectImage || !projectData.type || !projectData.title || 
-          !projectData.description || !projectData.techStack || !projectData.responsibilities) {
+          !projectData.githubUrl || !projectData.techStack || !projectData.responsibilities) {
         throw new Error('Please fill in all required fields');
       }
 
@@ -196,7 +196,7 @@ function Admin() {
       setProjectData({
         type: '',
         title: '',
-        description: '',
+        githubUrl: '',
         videoUrl: '',
         techStack: '',
         responsibilities: ''
@@ -214,7 +214,7 @@ function Admin() {
               title: savedData.title,
               'image-url': imageUrl,
               'video-url': savedData.videoUrl || null,
-              description: savedData.description,
+              'github-url': savedData.githubUrl,
               stack: savedData.techStack,
               responsibilities: savedData.responsibilities,
               user_id: userId
@@ -695,16 +695,16 @@ function Admin() {
                 </div>
 
                 <div className="form-group full-width">
-                  <label htmlFor="project-description-input">Project Description<span className="required">*</span></label>
-                  <textarea 
-                    placeholder="Describe your project, its features, and your role..." 
-                    className="admin-textarea" 
-                    id="project-description-input"
-                    rows="3"
-                    value={projectData.description}
-                    onChange={(e) => setProjectData({ ...projectData, description: e.target.value })}
+                  <label htmlFor="project-github-url-input">GitHub URL<span className="required">*</span></label>
+                  <input 
+                    type="url"
+                    placeholder="https://github.com/username/repository" 
+                    className="admin-input" 
+                    id="project-github-url-input"
+                    value={projectData.githubUrl}
+                    onChange={(e) => setProjectData({ ...projectData, githubUrl: e.target.value })}
                     required
-                  ></textarea>
+                  />
                 </div>
 
                 <div className="form-group full-width">
@@ -747,7 +747,7 @@ function Admin() {
                   setProjectData({
                     type: '',
                     title: '',
-                    description: '',
+                    githubUrl: '',
                     videoUrl: '',
                     techStack: '',
                     responsibilities: ''
